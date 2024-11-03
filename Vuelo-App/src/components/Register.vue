@@ -1,24 +1,25 @@
 <template>
-    <div class="register">
-        <h1>Registro</h1>
+    <div class="register container mt-5 p-4 shadow rounded" style="max-width: 400px; background-color: #f8f9fa;">
+        <h1 class="text-center mb-4">Registro</h1>
         <form @submit.prevent="registerUser">
-            <div>
-                <label for="userName">Nombre de Usuario:</label>
-                <input type="text" id="userName" v-model="username" required />
+            <div class="mb-3">
+                <label for="userName" class="form-label">Nombre de Usuario:</label>
+                <input type="text" id="userName" v-model="username" class="form-control" placeholder="Ingrese su usuario" required />
             </div>
-            <div>
-                <label for="email">Correo Electrónico:</label>
-                <input type="email" id="email" v-model="email" required />
+            <div class="mb-3">
+                <label for="email" class="form-label">Correo Electrónico:</label>
+                <input type="email" id="email" v-model="email" class="form-control" placeholder="Ingrese su correo electrónico" required />
             </div>
-            <div>
-                <label for="password">Contraseña:</label>
-                <input type="password" id="password" v-model="password" required />
+            <div class="mb-3">
+                <label for="password" class="form-label">Contraseña:</label>
+                <input type="password" id="password" v-model="password" class="form-control" placeholder="Ingrese su contraseña" required />
             </div>
-            <button type="submit">Registrarse</button>
+            <button type="submit" class="btn btn-primary w-100">Registrarse</button>
         </form>
-        <p v-if="errorMessage" class="error">{{ errorMessage }}</p>
+        <p v-if="errorMessage" class="text-danger text-center mt-3">{{ errorMessage }}</p>
     </div>
 </template>
+
 
 <script>
 import { ref } from 'vue';
