@@ -1,18 +1,22 @@
 <template>
-    <div>
-      <h1>Vuelos</h1>
-      <!-- Aquí puedes agregar el contenido del carrito -->
-    </div>
-  </template>
-  
-  <script>
-  export default {
-    name: 'Flights',
-    // Aquí puedes agregar la lógica del componente
+  <div>
+    <h1>Vuelos</h1>
+    <VuelosDisponibles/>
+  </div>
+</template>
+
+<script>
+import VuelosDisponibles from "../components/VuelosDisponibles.vue"; // Asegúrate de que esta ruta sea correcta
+
+export default {
+  name: 'Flights',
+  components: {
+      VuelosDisponibles
   }
-  </script>
-  
-  <style scoped>
-  /* Aquí puedes agregar estilos específicos para el componente */
-  </style>
-  
+  // Aquí puedes agregar la lógica del componente
+}
+</script>
+
+<style scoped>
+/* Aquí puedes agregar estilos específicos para el componente */
+</style>

@@ -11,6 +11,7 @@
 
 <script>
 import { useAuthStore } from "./stores/authStore.js"
+
 import { onMounted, computed } from "vue";
 import Nav from "../src/components/Nav.vue"
 
