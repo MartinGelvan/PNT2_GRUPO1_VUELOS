@@ -20,6 +20,7 @@ router.post('/', async (req, res) => {
     try {
         const newFlight = new Flight({ from, to, date, seats });
         await newFlight.save();
+        console.log(newFlight);
         res.status(201).json(newFlight); // Devuelve el vuelo creado
     } catch (error) {
         res.status(400).send('Error al crear el vuelo');
