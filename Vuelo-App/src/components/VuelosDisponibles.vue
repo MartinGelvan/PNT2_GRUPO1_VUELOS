@@ -17,7 +17,7 @@
                 <tr v-for="flight in flights" :key="flight.id">
                     <td>{{ flight.from }}</td>
                     <td>{{ flight.to }}</td>
-                    <td>{{ flight.date }}</td>
+                    <td>{{ formatDate(new Date(flight.date)) }}</td>
                     <td>{{ flight.seats }}</td>
                 </tr>
             </tbody>
@@ -40,12 +40,25 @@ export default {
 
         const flights = computed(() => flightStore.flights);
 
+        const formatDate = (date) => {
+            return date.toLocaleString('es-ES', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+        };
+
         return {
             flights,
+            formatDate, // Asegúrate de devolver formatDate para que esté disponible en la plantilla
         };
     },
 };
 </script>
+
 
 <style scoped>
 .table {
