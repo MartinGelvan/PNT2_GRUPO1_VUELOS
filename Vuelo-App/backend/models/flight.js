@@ -12,10 +12,6 @@ const FlightSchema = new mongoose.Schema({
    date: {
        type: Date,
        required: true // Si deseas que este campo sea obligatorio
-   },
-   seats: {
-       type: Number,
-       default: 0 // Establece el valor por defecto para los asientos
    }
 });
 

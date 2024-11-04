@@ -8,17 +8,23 @@
                     <th scope="col">A</th>
                     <th scope="col">Fecha</th>
                     <th scope="col">Asientos</th>
+                    <th scope="col">Acciones</th> 
                 </tr>
             </thead>
             <tbody>
                 <tr v-if="flights.length === 0">
-                    <td colspan="4" class="text-center">No hay vuelos disponibles.</td>
+                    <td colspan="5" class="text-center">No hay vuelos disponibles.</td>
                 </tr>
-                <tr v-for="flight in flights" :key="flight.id">
+                <tr v-for="flight in flights" :key="flight._id">
                     <td>{{ flight.from }}</td>
                     <td>{{ flight.to }}</td>
-                    <td>{{ flight.date }}</td>
+                    <td>{{ new Date(flight.date).toLocaleDateString() }}</td>
                     <td>{{ flight.seats }}</td>
+                    <td>
+                        <router-link :to="`/flights/${flight._id}`">
+                            <button class="btn btn-primary">Reservar</button>
+                        </router-link>
+                    </td>
                 </tr>
             </tbody>
         </table>
@@ -35,7 +41,7 @@ export default {
         const flightStore = useFlightStore();
 
         onMounted(() => {
-            flightStore.fetchFlights(); // Cargar vuelos al montar el componente
+            flightStore.fetchFlights(); 
         });
 
         const flights = computed(() => flightStore.flights);
@@ -49,15 +55,15 @@ export default {
 
 <style scoped>
 .table {
-    margin-top: 20px; /* Espaciado superior para la tabla */
-    margin: auto; /* Centrar la tabla horizontalmente */
+    margin-top: 20px;
+    margin: auto; 
 }
 
 .table th, .table td {
-    vertical-align: middle; /* Centrar contenido verticalmente */
+    vertical-align: middle; 
 }
 
 .thead-light {
-    background-color: #babbbc; /* Color de fondo claro para el encabezado */
+    background-color: #babbbc;
 }
 </style>

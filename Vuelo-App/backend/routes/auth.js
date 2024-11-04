@@ -1,13 +1,23 @@
 import express from "express";
-import bcrypt from "bcryptjs"
-import jwt from "jsonwebtoken"
-import User from "../models/user.js"
+import bcrypt from "bcryptjs";
+import jwt from "jsonwebtoken";
+import User from "../models/user.js";
 
+const router = express.Router();
 
-const router = express.Router()
+// Middleware to authenticate JWT token
+const authenticateToken = (req, res, next) => {
+    const token = req.headers['authorization']?.split(' ')[1];
+    if (!token) return res.sendStatus(401);
 
-//Registro
+    jwt.verify(token, 'secret', (err, user) => {
+        if (err) return res.sendStatus(403);
+        req.user = user;
+        next();
+    });
+};
 
+// Registro
 router.post('/register', async (req, res) => {
     const { userName, email, password } = req.body;
 
@@ -24,9 +34,7 @@ router.post('/register', async (req, res) => {
     }
 });
 
-
-//Inicio de Sesion
-
+// Inicio de Sesion
 router.post('/login', async (req, res) => {
     const { userName, password } = req.body;
 
@@ -43,6 +51,18 @@ router.post('/login', async (req, res) => {
     }
 });
 
-const Router = router
+// Obtener detalles del usuario
+router.get('/profile', authenticateToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select('-password'); // Exclude password
+        if (!user) return res.status(404).send('Usuario no encontrado');
+        res.json(user);
+    } catch (error) {
+        console.error("Error al obtener perfil:", error);
+        res.status(500).send('Error en el servidor');
+    }
+});
 
-export default Router
+const Router = router;
+
+export default Router;

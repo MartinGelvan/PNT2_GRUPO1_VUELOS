@@ -1,26 +1,45 @@
 <template>
-  <div>
-    <h1>Vuelos</h1>
-    <VuelosDisponibles/>
-    <AgregarVuelo />
-    
+  <div class="container mt-4">
+      <h2 class="text-center mb-4">Buscar Vuelos</h2>
+      
+      <!-- Add Flight Button -->
+      <button class="btn btn-primary mb-4" @click="showAddFlight = !showAddFlight">
+          {{ showAddFlight ? 'Cancelar Agregar Vuelo' : 'Agregar Vuelo' }}
+      </button>
+
+      <!-- Conditional Rendering for AgregarVuelo Component -->
+      <AgregarVuelo v-if="showAddFlight" />
+
+      <!-- Vuelos Disponibles Component -->
+      <VuelosDisponibles />
   </div>
 </template>
 
 <script>
-import VuelosDisponibles from "../components/VuelosDisponibles.vue"; // Asegúrate de que esta ruta sea correcta
-import AgregarVuelo from "../components/AgregarVuelo.vue";
+import VuelosDisponibles from './VuelosDisponibles.vue';
+import AgregarVuelo from './AgregarVuelo.vue'; // Import the AgregarVuelo component
 
 export default {
   name: 'Flights',
   components: {
       VuelosDisponibles,
-      AgregarVuelo,
+      AgregarVuelo
+  },
+  data() {
+      return {
+          showAddFlight: false // Control for showing the AgregarVuelo component
+      };
   }
-  // Aquí puedes agregar la lógica del componente
-}
+};
 </script>
 
 <style scoped>
-/* Aquí puedes agregar estilos específicos para el componente */
+.container {
+  max-width: 800px; /* Set a maximum width for the container */
+  margin: 0 auto; /* Center the container */
+}
+
+.btn {
+  width: 100%; /* Make the button full width */
+}
 </style>

@@ -3,6 +3,7 @@ import mongoose from "mongoose"
 import cors from "cors"
 import authRoutes from "./routes/auth.js"
 import flightRoutes from "./routes/fligths.js"
+import bookingRoutes from "./routes/bookingFlight.js"
 
 
 const app = express()
@@ -20,6 +21,7 @@ mongoose.connect('mongodb://localhost:27017/vueloApp')
 
 app.use('/api',authRoutes)
 app.use('/api/flights',flightRoutes)
+app.use('/api/bookings', bookingRoutes);
 
 app.listen(PORT,()=>{
     console.log(`Servidor corriendo en el puerto ${PORT}`)
