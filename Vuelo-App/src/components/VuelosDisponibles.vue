@@ -6,7 +6,7 @@
                 <tr>
                     <th scope="col">De</th>
                     <th scope="col">A</th>
-                    <th scope="col">Fecha</th>
+                    <th scope="col">Fecha/Hora</th>
                     <th scope="col">Asientos</th>
                     <th scope="col">Acciones</th> 
                 </tr>
@@ -18,7 +18,7 @@
                 <tr v-for="flight in flights" :key="flight._id">
                     <td>{{ flight.from }}</td>
                     <td>{{ flight.to }}</td>
-                    <td>{{ new Date(flight.date).toLocaleDateString() }}</td>
+                    <td>{{ formatDate(new Date(flight.date)) }}</td>
                     <td>{{ flight.seats }}</td>
                     <td>
                         <router-link :to="`/flights/${flight._id}`">
@@ -46,12 +46,25 @@ export default {
 
         const flights = computed(() => flightStore.flights);
 
+        const formatDate = (date) => {
+            return date.toLocaleString('es-ES', {
+                year: 'numeric',
+                month: '2-digit',
+                day: '2-digit',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+        };
+
         return {
             flights,
+            formatDate, // Asegúrate de devolver formatDate para que esté disponible en la plantilla
         };
     },
 };
 </script>
+
 
 <style scoped>
 .table {

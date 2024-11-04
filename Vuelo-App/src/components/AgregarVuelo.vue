@@ -15,7 +15,8 @@
                         </div>
                         <div class="col mb-3">
                             <label for="date" class="form-label">Fecha</label>
-                            <input type="date" id="date" v-model="date" class="form-control" required />
+                            <input type="datetime-local" id="date" v-model="date" class="form-control" required />
+                            
                         </div>
                         <div class="col mb-3">
                             <label for="seats" class="form-label">Asientos</label>
