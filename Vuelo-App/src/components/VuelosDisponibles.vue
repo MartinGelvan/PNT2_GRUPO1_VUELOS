@@ -6,7 +6,7 @@
                 <tr>
                     <th scope="col">De</th>
                     <th scope="col">A</th>
-                    <th scope="col">Fecha</th>
+                    <th scope="col">Fecha/Hora</th>
                     <th scope="col">Asientos</th>
                 </tr>
             </thead>
