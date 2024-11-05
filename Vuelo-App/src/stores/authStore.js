@@ -12,8 +12,9 @@ export const useAuthStore = defineStore('auth', {
     },
     actions: {
         async register(username, email, password) {
+            
             try {
-                const response = await axios.post('http://localhost:5000/api/register', { userName: username, email, password });
+                const response = await axios.post('http://localhost:5000/api/register', { userName: username, email, password  });
                 this.user = response.data.user; // Guarda los datos del usuario
                 this.token = response.data.token; // Guarda el token
                 localStorage.setItem('token', this.token); // Guarda el token en localStorage

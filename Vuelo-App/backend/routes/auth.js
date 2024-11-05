@@ -23,7 +23,7 @@ router.post('/register', async (req, res) => {
 
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
-        const newUser = new User({ userName, email, password: hashedPassword });
+        const newUser = new User({name, lastName, userName, email, phone, password: hashedPassword });
         await newUser.save();
         res.status(201).send('Usuario Registrado'); // Mensaje de éxito
     } catch (error) {
@@ -62,6 +62,25 @@ router.get('/profile', authenticateToken, async (req, res) => {
         res.status(500).send('Error en el servidor');
     }
 });
+// Actualizar perfil del usuario
+router.post('/profile', authenticateToken, async (req, res) => {
+    const { name, lastName, email, phone } = req.body; // Recibir los datos a actualizar
+
+    try {
+        const updatedUser = await User.findByIdAndUpdate(
+            req.user.id, // El id del usuario autenticado
+            { name, lastName, email, phone }, // Datos a actualizar
+            { new: true, runValidators: true } // Opciones: devuelve el documento actualizado y valida los datos
+        ).select('-password'); // Excluir la contraseña de la respuesta
+
+        if (!updatedUser) return res.status(404).send('Usuario no encontrado');
+        res.json(updatedUser); // Devuelve el usuario actualizado
+    } catch (error) {
+        console.error("Error al actualizar perfil:", error);
+        res.status(500).send('Error en el servidor');
+    }
+});
+
 
 const Router = router;
 
