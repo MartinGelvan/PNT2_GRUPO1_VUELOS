@@ -2,6 +2,8 @@ import express from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import User from "../models/user.js";
+import MongoConnection from "../models/MongoConnection.js"
+import { MongoClient, ObjectId } from "mongodb";
 
 const router = express.Router();
 
@@ -55,6 +57,7 @@ router.post('/login', async (req, res) => {
 router.get('/profile', authenticateToken, async (req, res) => {
     try {
         const user = await User.findById(req.user.id).select('-password'); // Exclude password
+        console.log(user)
         if (!user) return res.status(404).send('Usuario no encontrado');
         res.json(user);
     } catch (error) {
@@ -63,10 +66,17 @@ router.get('/profile', authenticateToken, async (req, res) => {
     }
 });
 // Actualizar perfil del usuario
-router.post('/profile', authenticateToken, async (req, res) => {
+router.put('/profile', authenticateToken, async (req, res) => {
     const { name, lastName, email, phone } = req.body; // Recibir los datos a actualizar
 
     try {
+
+        const result = await MongoConnection.db.collection("users").updateOne(
+            { _id: new ObjectId(id) }, 
+            { $set: data } 
+        );
+
+        /*
         const updatedUser = await User.findByIdAndUpdate(
             req.user.id, // El id del usuario autenticado
             { name, lastName, email, phone }, // Datos a actualizar
@@ -75,6 +85,7 @@ router.post('/profile', authenticateToken, async (req, res) => {
 
         if (!updatedUser) return res.status(404).send('Usuario no encontrado');
         res.json(updatedUser); // Devuelve el usuario actualizado
+        */
     } catch (error) {
         console.error("Error al actualizar perfil:", error);
         res.status(500).send('Error en el servidor');

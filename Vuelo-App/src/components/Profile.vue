@@ -5,7 +5,7 @@
       <div v-if="loading" class="text-center">Cargando...</div>
       <div v-else>
         <form @submit.prevent="updateUserProfile">
-            <input type="text" v-model="profile.id" class="form-control"  required />
+           
           <div class="form-group">
             <label for="name">Nombre</label>
             <input type="text" v-model="profile.name" class="form-control" id="name" required />
@@ -35,7 +35,7 @@
   </template>
   
   <script>
-  import { useProfileStore } from '../stores/profileStore';
+  import { useProfileStore } from '../stores/profileStore.js';
   import { onMounted } from 'vue';
   
   export default {
