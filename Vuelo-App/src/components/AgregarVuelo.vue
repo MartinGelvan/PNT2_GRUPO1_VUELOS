@@ -33,11 +33,13 @@
 <script>
 import { ref } from 'vue';
 import { useFlightStore } from '../stores/flightStore';
+import { useRouter } from 'vue-router';
 
 export default {
     name: 'AgregarVuelo',
     setup() {
         const flightStore = useFlightStore();
+        const router = useRouter();
         const from = ref('');
         const to = ref('');
         const date = ref('');
@@ -51,6 +53,7 @@ export default {
                 date.value = '';
                 seats.value = 0;
                 alert('Vuelo agregado exitosamente');
+                router.push('/seats');
             } catch (error) {
                 console.error('Error al agregar vuelo:', error);
                 alert('Hubo un error al agregar el vuelo');

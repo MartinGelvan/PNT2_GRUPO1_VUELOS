@@ -18,7 +18,8 @@ const BookingSchema = new mongoose.Schema({
     luggage: {
         type: Number,
         required: true
-    }
+    },
+    selectedSeats: [{ type: Number }],
 });
 
 const Booking = mongoose.model('Booking', BookingSchema);
