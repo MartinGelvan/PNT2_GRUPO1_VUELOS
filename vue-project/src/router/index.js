@@ -4,6 +4,7 @@ import Flights from '@/components/FlightList.vue'
 import Profile from '@/components/Profile.vue';
 import Login from '@/components/Login.vue';
 import Register from '@/components/Register.vue';
+import Seats from '@/components/Seats.vue';
 
 const routes = [
   {
@@ -36,6 +37,13 @@ const routes = [
     name: 'home',
     component: Home,
   },
+  {
+    path: '/seats',
+    name: 'Seats',
+    component: Seats,
+    props: route => ({ flightId: route.query.flightId }),  // Esto pasará el `flightId` a tu componente Seats
+  },
+  
 ];
 
 const router = createRouter({

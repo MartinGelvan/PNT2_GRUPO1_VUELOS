@@ -1,14 +1,18 @@
 import mongoose from 'mongoose';
 
 const seatSchema = new mongoose.Schema({
-  number: {
-    type: String,
-    required: [true, 'el numero es obligatorio'], 
-    unique: true,
+  flightId: {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+    ref: 'Flight',  // Si el vuelo es una referencia a otro modelo
   },
-  estaOcupado: {
+  seatNumber: {
+    type: String,
+    required: true,
+  },
+  isBooked: {
     type: Boolean,
-    
+    default: false,
   },
 });
 

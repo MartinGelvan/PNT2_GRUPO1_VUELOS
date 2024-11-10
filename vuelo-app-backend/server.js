@@ -20,11 +20,9 @@ app.use(cors({
 
 app.use(express.json());  
 
-app.use('/api/seats', seatsRoutes);
+app.use('/api/', seatsRoutes);
 app.use('/api/auth', authRoutes);
-
-
-app.use(flightRoutes); 
+app.use('/api/flights', flightRoutes);
 
 
 app.listen(5001, () => {
