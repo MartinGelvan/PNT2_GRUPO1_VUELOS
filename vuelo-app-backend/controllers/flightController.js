@@ -16,6 +16,17 @@ export const getFlights = async (req, res) => {
   }
 };
 
+export const getFlightById = async (req, res) => {
+  try {
+    const flight = await Flight.findOne({_id: req.query.flightId});  // Obtener todos los vuelos
+    console.log("Este es mi unico Flight: ", flight)
+    
+    res.json(flight);
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+};
+
 // Función para reservar asientos de un vuelo
 export const reserveFlight = async (req, res) => {
   const { flightId, seatNumbers } = req.body;

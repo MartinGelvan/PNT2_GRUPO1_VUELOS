@@ -1,11 +1,13 @@
 import express from 'express';
 import { getSeatsForFlight , reserveBatchSeats } from '../controllers/seatController.js';
+import Seat from '../models/Seat.js';
+import Flight from '../models/Flight.js';
 import mongoose from 'mongoose';
 
 const router = express.Router();  // Usa 'router', no 'app'
 
 // Ruta para obtener los asientos de un vuelo específico
-router.get('/seats', async (req, res) => {
+router.get('/', async (req, res) => {
     try {
       const { flightId } = req.query;  // Asegúrate de que flightId esté llegando correctamente
   
@@ -27,6 +29,50 @@ router.get('/seats', async (req, res) => {
     }
   });
   
+  // Endpoint para reservar asientos
+router.post('/reserve-seats', async (req, res) => {
+  const { flightId, selectedSeats } = req.body;
+
+  if (!flightId || !selectedSeats || selectedSeats.length === 0) {
+    return res.status(400).json({ success: false, message: 'Datos incompletos' });
+  }
+
+  try {
+    // Comprobar que los asientos seleccionados pertenecen al vuelo correcto y están disponibles
+    const flight = await Flight.findById(flightId);
+    if (!flight) {
+      return res.status(404).json({ success: false, message: 'Vuelo no encontrado' });
+    }
+
+    // Verificar que los asientos no están ocupados
+    const seatsToUpdate = await Seat.find({
+      flightId: flightId,
+      number: { $in: selectedSeats },  // Buscar los asientos seleccionados
+    });
+
+    const unavailableSeats = seatsToUpdate.filter(seat => seat.estaOcupado);
+    if (unavailableSeats.length > 0) {
+      return res.status(400).json({
+        success: false,
+        message: `Los siguientes asientos ya están ocupados: ${unavailableSeats.map(seat => seat.number).join(', ')}`,
+      });
+    }
+
+    // Marcar los asientos seleccionados como ocupados
+    await Seat.updateMany(
+      { flightId: flightId, number: { $in: selectedSeats } },
+      { $set: { estaOcupado: true } }
+    );
+
+    // Responder con éxito
+    res.json({ success: true, message: 'Asientos reservados con éxito' });
+
+  } catch (error) {
+    console.error('Error al reservar asientos:', error);
+    res.status(500).json({ success: false, message: 'Error interno del servidor' });
+  }
+});
+
 
 // Ruta para reservar varios asientos
 router.post('/reserveBatch', async (req, res) => {
