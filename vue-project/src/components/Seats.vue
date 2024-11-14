@@ -11,7 +11,7 @@
               type="checkbox" 
               v-model="selectedSeats" 
               :value="seat.number"    
-              :disabled="seat.estaOcupado || selectedSeats.length >= seatCount"  
+              :disabled="seat.isBooked || selectedSeats.length >= seatCount"  
             />
             {{ seat.number }}
           </label>
@@ -58,7 +58,7 @@ const router = useRouter()
 const reservationStore = useReservationStore();
 const flightId = route.query.flightId;  // Asigna el parámetro flightId de la URL
 const seatCountFromRoute = route.query.seatCount;
-console.log("flightId en Seats.vue:", flightId);
+
 
 // Convertir seatCount en un número entero
 seatCount.value = parseInt(seatCountFromRoute, 10);
@@ -71,13 +71,16 @@ const getSeats = async () => {
       throw new Error('No se ha proporcionado un flightId válido');
     }
 
+    const responseFlight = await axios.get('http://localhost:5001/api/flights/flight', {
+      params: { flightId: flightId }
+    });
+    flight.value = responseFlight.data;
+
     const response = await axios.get('http://localhost:5001/api/seats', {
       params: { flightId: flightId }
     });
-    flight.value = response.data;
-
     // Filtrar solo los asientos disponibles
-    seats.value = response.data.filter(seat => !seat.estaOcupado); // Sólo mostrar asientos no ocupados
+    seats.value = response.data.filter(seat => !seat.isBooked); // Sólo mostrar asientos no ocupados
 
     // Si la cantidad de asientos disponibles es menor que la cantidad solicitada, mostrar mensaje
     if (seats.value.length < seatCount.value) {
@@ -112,14 +115,13 @@ const saveSeats = async () => {
       if (response.data && response.data.flight) {
         // Aquí debes asegurarte de que `flight` no sea un array
         flight.value = Array.isArray(response.data.flight) ? response.data.flight[0] : response.data.flight;
-        console.log("Vuelo obtenido:", flight.value);
+      
       } else {
         throw new Error('No se pudo obtener el vuelo');
       }
     }
 
-    // Verifica que tenemos el vuelo correctamente asignado
-    console.log("Vuelo a reservar:", flight.value);
+   
 
     // Enviar los asientos seleccionados al backend
     const reservationResponse = await axios.post('http://localhost:5001/api/seats/reserve-seats', {
@@ -130,6 +132,7 @@ const saveSeats = async () => {
     if (reservationResponse.data.success) {
       // Guardamos la reserva en el store
       reservationStore.setReservation(flight.value, selectedSeats.value);
+      
 
       alert('Asientos reservados con éxito');
       

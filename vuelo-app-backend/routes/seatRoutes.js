@@ -50,7 +50,7 @@ router.post('/reserve-seats', async (req, res) => {
       number: { $in: selectedSeats },  // Buscar los asientos seleccionados
     });
 
-    const unavailableSeats = seatsToUpdate.filter(seat => seat.estaOcupado);
+    const unavailableSeats = seatsToUpdate.filter(seat => seat.isBooked);
     if (unavailableSeats.length > 0) {
       return res.status(400).json({
         success: false,
@@ -61,7 +61,7 @@ router.post('/reserve-seats', async (req, res) => {
     // Marcar los asientos seleccionados como ocupados
     await Seat.updateMany(
       { flightId: flightId, number: { $in: selectedSeats } },
-      { $set: { estaOcupado: true } }
+      { $set: { isBooked: true } }
     );
 
     // Responder con éxito

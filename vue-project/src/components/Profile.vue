@@ -1,38 +1,25 @@
 <template>
-  <div class="profile">
-    <h2>Bienvenido, {{ userStore.getUserName }}</h2>
-
-    <h3>Vuelos disponibles</h3>
-    <ul>
-      <li v-for="flight in flights" :key="flight._id">
-        {{ flight.flightNumber }} - {{ flight.departure }} to {{ flight.destination }} - {{ flight.date }} 
-        <button @click="navigateToSeats(flight._id)">Reservar</button> <!-- Pasa el flightId dinámicamente -->
-        
-        <!-- Input para la cantidad de asientos -->
-        <input 
-          type="number" 
-          v-model="seatCounts[flight._id]"
-          :placeholder="'Cantidad de asientos'"
-          :min="1"  
-          :max="flight.availableSeats"  
-        />
-        <p v-if="seatCounts[flight._id] > flight.availableSeats" class="error-text">
-          Solo hay {{ flight.availableSeats }} asientos disponibles para este vuelo.
+  <div class="profile-container">
+    <div class="profile-card">
+      <h2 class="text-center">Bienvenido, {{ userStore.getUserName }}</h2>
+      
+      <!-- Información de la reserva -->
+      <div v-if="reservedFlight && reservedSeats.length > 0" class="reserved-flight-section">
+        <h3 class="text-center">Vuelo Reservado</h3>
+        <p class="flight-details">
+          <strong>Vuelo:</strong> {{ reservedFlight.flightNumber }} - {{ reservedFlight.departure }} to {{ reservedFlight.destination }}<br />
+          <strong>Fecha:</strong> {{ reservedFlight.date }}<br />
+          <strong>Asientos reservados:</strong> {{ reservedSeats.join(', ') }}
         </p>
-      </li>
-    </ul>
+      </div>
 
-    <!-- Mostrar información de la reserva -->
-   <div v-if="reservedFlight && reservedSeats.length > 0">
-  <h3>Vuelo reservado:</h3>
-  <p>
-    {{ reservedFlight.flightNumber }} - {{ reservedFlight.departure }} to {{ reservedFlight.destination }}<br />
-    Fecha: {{ reservedFlight.date }}<br />
-    Asientos reservados: {{ reservedSeats.join(', ') }}
-  </p>
-</div>
+      <!-- Si no hay vuelo reservado -->
+      <div v-else>
+        <p class="no-reservation text-center">No tienes ninguna reserva activa.</p>
+      </div>
 
-
+      
+    </div>
   </div>
 </template>
 
@@ -43,9 +30,6 @@ import { useUserStore } from '../store/userStore.js';
 import { useRouter } from 'vue-router';
 import { useReservationStore } from '../store/reservationStore.js';
 
-const flights = ref([]);
-const seatCounts = ref({}); 
-
 const userStore = useUserStore();
 const reservationStore = useReservationStore();
 const router = useRouter();
@@ -54,68 +38,83 @@ const router = useRouter();
 const reservedFlight = computed(() => reservationStore.getReservedFlight);
 const reservedSeats = computed(() => reservationStore.getReservedSeats);
 
+// Traer vuelos al montar el componente
 onMounted(() => {
-  console.log("Por traer vuelos");
-  getFlights();
-  // Verifica si los datos del vuelo y asientos están correctos
-  console.log("reservedFlight:", reservedFlight.value);
-  console.log("reservedSeats:", reservedSeats.value);
-  console.log("vuelos obtenidos");
+  console.log("Profile cargado");
 });
 
-
-
-const getFlights = async () => {
-  try {
-    const response = await axios.get('http://localhost:5001/api/flights');
-    flights.value = response.data;
-   
-    console.log("Esto me trae flights: " , flights.value)
-  } catch (err) {
-    console.error('Error al obtener vuelos:', err);
-  }
-};
-
-
-console.log("ReserveFLightssss: " , reservedFlight)
-
-
 const navigateToSeats = (flightId) => {
-  console.log('Flight ID:', flightId); // Verifica que el flightId esté pasando correctamente
-  const seats = seatCounts.value[flightId];
-  const selectedFlight = flights.value.find(flight => flight._id === flightId);
-  console.log('Cantidad de asientos seleccionados:', seats);  // Verifica los asientos seleccionados
   if (!flightId) {
-    alert('No se proporcionó un flightId válido');
+    alert('No hay vuelo seleccionado.');
     return;
   }
-
-  // Verificar si el vuelo no se encontró
-  if (!selectedFlight) {
-    alert('El vuelo no se encuentra disponible.');
-    return;
-  }
-  
-  if (!seats || seats <= 0) {
-    alert('Por favor ingresa una cantidad válida de asientos');
-    return;
-  }
-
-  if (seats > selectedFlight.availableSeats) {
-    alert(`Solo hay ${selectedFlight.availableSeats} asientos disponibles para este vuelo.`);
-    return;
-  }
-  // Navegar a la página de selección de asientos, pasando el flightId como query parameter
-  router.push(`/seats?flightId=${flightId}&seatCount=${seats}`);
+  router.push(`/seats?flightId=${flightId}`);
 };
-
 </script>
 
 <style scoped>
-/* Estilos para la sección de error */
-.error-text {
-  color: red;
-  font-size: 0.9em;
-  margin-left: 10px;
+/* Estilo general de la página */
+.profile-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background-color: #f4f7fc;
+}
+
+.profile-card {
+  background-color: #ffffff;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  padding: 40px;
+  width: 100%;
+  max-width: 500px;
+  text-align: center;
+}
+
+h2 {
+  font-size: 30px;
+  font-weight: bold;
+  color: #333;
+}
+
+h3 {
+  font-size: 24px;
+  color: #007bff;
+  margin-bottom: 20px;
+}
+
+.flight-details {
+  font-size: 18px;
+  color: #333;
+  line-height: 1.6;
+}
+
+.no-reservation {
+  font-size: 18px;
+  color: #e74c3c;
+}
+
+button {
+  font-size: 16px;
+  padding: 10px 20px;
+  background-color: #007bff;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  transition: background-color 0.3s ease;
+}
+
+button:hover {
+  background-color: #0056b3;
+}
+
+/* Estilo de los textos y elementos dentro de la tarjeta */
+.reserved-flight-section {
+  margin-top: 20px;
+  background-color: #e9f7fe;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 </style>

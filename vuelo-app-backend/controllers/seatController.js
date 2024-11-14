@@ -32,8 +32,8 @@ export const reserveBatchSeats = async (req, res) => {
     // Reservar múltiples asientos
     for (let seat of seatsToReserve) {
       const seatData = await Seat.findById(seat._id);
-      if (seatData && !seatData.estaOcupado) {
-        seatData.estaOcupado = true;
+      if (seatData && !seatData.isBooked) {
+        seatData.isBooked = true;
         await seatData.save();
       }
     }
