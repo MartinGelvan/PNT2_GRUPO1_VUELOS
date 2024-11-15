@@ -3,26 +3,24 @@ import { defineStore } from 'pinia';
 
 export const useReservationStore = defineStore('reservation', {
   state: () => ({
-    reservedFlight: null, // Esto debe ser un objeto, no un array
+    reservedFlights: [], // Esto debe ser un objeto, no un array
     reservedSeats: [],
   }),
   getters: {
-    getReservedFlight(state) {
-      return state.reservedFlight; // Debería ser un objeto de vuelo
+    getReservedFlights(state) {
+      return state.reservedFlights;  // Devuelve todos los vuelos reservados
     },
     getReservedSeats(state) {
       return state.reservedSeats;
     }
   },
   actions: {
-    setReservation(flight, seats) {
-      // Asegúrate de que flight es un objeto, no un array
-      if (Array.isArray(flight)) {
-        this.reservedFlight = flight[0]; // Si es un array, tomar el primer elemento
-      } else {
-        this.reservedFlight = flight;
-      }
-      this.reservedSeats = seats;
-    }
+    addReservation(flight, seats) {
+      // Agregar una nueva reserva al array
+      this.reservedFlights.push({
+        flight,  // Vuelo reservado
+        seats,   // Asientos reservados
+      });
   }
+}
 });

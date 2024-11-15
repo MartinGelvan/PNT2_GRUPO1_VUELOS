@@ -2,58 +2,48 @@
   <div class="profile-container">
     <div class="profile-card">
       <h2 class="text-center">Bienvenido, {{ userStore.getUserName }}</h2>
-      
-      <!-- Información de la reserva -->
-      <div v-if="reservedFlight && reservedSeats.length > 0" class="reserved-flight-section">
-        <h3 class="text-center">Vuelo Reservado</h3>
-        <p class="flight-details">
-          <strong>Vuelo:</strong> {{ reservedFlight.flightNumber }} - {{ reservedFlight.departure }} to {{ reservedFlight.destination }}<br />
-          <strong>Fecha:</strong> {{ reservedFlight.date }}<br />
-          <strong>Asientos reservados:</strong> {{ reservedSeats.join(', ') }}
-        </p>
+
+      <!-- Mostrar todos los vuelos reservados -->
+      <div v-if="reservedFlights.length > 0" class="reserved-flights-section">
+        <h3 class="text-center">Vuelos Reservados</h3>
+        
+        <!-- Iterar sobre los vuelos reservados -->
+        <div v-for="(reservation, index) in reservedFlights" :key="index" class="reserved-flight-item">
+          <p class="flight-details">
+            <strong>Vuelo:</strong> {{ reservation.flight.flightNumber }} - {{ reservation.flight.departure }} to {{ reservation.flight.destination }}<br />
+            <strong>Fecha:</strong> {{ reservation.flight.date }}<br />
+            <strong>Asientos reservados:</strong> {{ reservation.seats.join(', ') }}
+          </p>
+        </div>
       </div>
 
-      <!-- Si no hay vuelo reservado -->
+      <!-- Si no hay vuelos reservados -->
       <div v-else>
         <p class="no-reservation text-center">No tienes ninguna reserva activa.</p>
       </div>
-
-      
     </div>
   </div>
 </template>
 
 <script setup>
 import { ref, computed, onMounted } from 'vue';
-import axios from 'axios';
 import { useUserStore } from '../store/userStore.js';
-import { useRouter } from 'vue-router';
 import { useReservationStore } from '../store/reservationStore.js';
 
 const userStore = useUserStore();
 const reservationStore = useReservationStore();
-const router = useRouter();
 
-// Computed properties para acceder a los valores reactivos desde la store
-const reservedFlight = computed(() => reservationStore.getReservedFlight);
-const reservedSeats = computed(() => reservationStore.getReservedSeats);
+// Computed properties para acceder a todos los vuelos reservados
+const reservedFlights = computed(() => reservationStore.getReservedFlights);
 
-// Traer vuelos al montar el componente
+// No necesitas hacer ninguna llamada a la API, ya que las reservas están en el store
 onMounted(() => {
   console.log("Profile cargado");
 });
-
-const navigateToSeats = (flightId) => {
-  if (!flightId) {
-    alert('No hay vuelo seleccionado.');
-    return;
-  }
-  router.push(`/seats?flightId=${flightId}`);
-};
 </script>
 
 <style scoped>
-/* Estilo general de la página */
+/* Estilos */
 .profile-container {
   display: flex;
   justify-content: center;
@@ -110,11 +100,15 @@ button:hover {
 }
 
 /* Estilo de los textos y elementos dentro de la tarjeta */
-.reserved-flight-section {
+.reserved-flights-section {
   margin-top: 20px;
   background-color: #e9f7fe;
   padding: 20px;
   border-radius: 8px;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.reserved-flight-item {
+  margin-bottom: 15px;
 }
 </style>

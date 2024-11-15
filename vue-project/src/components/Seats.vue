@@ -1,40 +1,45 @@
 <template>
-  <div>
-    <h1>Asientos disponibles</h1>
+  <div class="seats-container">
+    <h1 class="title">Selecciona tus asientos</h1>
 
-    <div v-if="seats.length > 0">
-      <ul>
-        <li v-for="(seat, index) in seats" :key="seat._id">
-          <!-- Mostrar número de asiento y un checkbox -->
-          <label>
+    <div v-if="seats.length > 0" class="seats-list">
+      <h2 class="subtitle">Asientos Disponibles</h2>
+      <div class="seats-grid">
+        <!-- Mostrar los asientos disponibles en una cuadrícula -->
+        <div 
+          v-for="(seat, index) in seats" 
+          :key="seat._id" 
+          class="seat-item"
+        >
+          <label :for="'seat' + seat.number" class="seat-label">
             <input 
               type="checkbox" 
               v-model="selectedSeats" 
               :value="seat.number"    
               :disabled="seat.isBooked || selectedSeats.length >= seatCount"  
+              :id="'seat' + seat.number"
+              class="seat-checkbox"
             />
-            {{ seat.number }}
+            <span class="seat-number">{{ seat.number }}</span>
           </label>
-        </li>
-      </ul>
+        </div>
+      </div>
 
       <!-- Mostrar los asientos seleccionados -->
-      <div>
-        <h2>Asientos seleccionados:</h2>
+      <div class="selected-seats">
+        <h3>Asientos seleccionados:</h3>
         <ul>
-          <!-- Mostrar los números de los asientos seleccionados -->
-          <li v-for="(seat, index) in selectedSeats" :key="index">
-            {{ seat }}  <!-- Mostrar el número de cada asiento seleccionado -->
+          <li v-for="(seat, index) in selectedSeats" :key="index" class="selected-seat-item">
+            {{ seat }}
           </li>
-           <!-- Botón para enviar la selección de asientos -->
-          <button @click="saveSeats">Guardar selección</button>
         </ul>
+        <button @click="saveSeats" class="btn-save">Guardar Selección</button>
       </div>
 
     </div>
 
     <div v-else>
-      <p>No hay asientos disponibles.</p>
+      <p class="no-seats">No hay asientos disponibles en este vuelo.</p>
     </div>
   </div>
 </template>
@@ -46,24 +51,18 @@ import { useRoute } from 'vue-router';
 import { useRouter } from 'vue-router';
 import { useReservationStore } from '../store/reservationStore.js';
 
-// Definir las referencias reactivas
 const seats = ref([]);
-const selectedSeats = ref([]);  // Usa un array para almacenar los asientos seleccionados
-const seatCount = ref(0); // Usar una referencia para la cantidad de asientos seleccionados
-const flight = ref(null); // Almacenar la información del vuelo
+const selectedSeats = ref([]);
+const seatCount = ref(0);
+const flight = ref(null);
 
-// Obtener el objeto de la ruta y extraer el parámetro flightId y seatCount
 const route = useRoute();
-const router = useRouter()
+const router = useRouter();
 const reservationStore = useReservationStore();
-const flightId = route.query.flightId;  // Asigna el parámetro flightId de la URL
+const flightId = route.query.flightId;
 const seatCountFromRoute = route.query.seatCount;
 
-
-// Convertir seatCount en un número entero
 seatCount.value = parseInt(seatCountFromRoute, 10);
-
-
 
 const getSeats = async () => {
   try {
@@ -79,10 +78,8 @@ const getSeats = async () => {
     const response = await axios.get('http://localhost:5001/api/seats', {
       params: { flightId: flightId }
     });
-    // Filtrar solo los asientos disponibles
-    seats.value = response.data.filter(seat => !seat.isBooked); // Sólo mostrar asientos no ocupados
+    seats.value = response.data.filter(seat => !seat.isBooked);
 
-    // Si la cantidad de asientos disponibles es menor que la cantidad solicitada, mostrar mensaje
     if (seats.value.length < seatCount.value) {
       alert('No hay suficientes asientos disponibles para la cantidad solicitada.');
     }
@@ -93,7 +90,6 @@ const getSeats = async () => {
   }
 };
 
-// Función para guardar la selección de asientos
 const saveSeats = async () => {
   try {
     if (selectedSeats.value.length !== seatCount.value) {
@@ -101,42 +97,22 @@ const saveSeats = async () => {
       return;
     }
 
-    // Verificar si ya tenemos el vuelo cargado
     if (!flight.value) {
-      console.log("Obteniendo vuelo con flightId:", flightId);
-
       const response = await axios.get('http://localhost:5001/api/flights/flight', {
         params: { flightId: flightId },
       });
 
-      console.log("Respuesta de la API para el vuelo:", response.data);
-
-      // Verificar que la respuesta contiene un solo vuelo (en lugar de un array)
-      if (response.data && response.data.flight) {
-        // Aquí debes asegurarte de que `flight` no sea un array
-        flight.value = Array.isArray(response.data.flight) ? response.data.flight[0] : response.data.flight;
-      
-      } else {
-        throw new Error('No se pudo obtener el vuelo');
-      }
+      flight.value = Array.isArray(response.data.flight) ? response.data.flight[0] : response.data.flight;
     }
 
-   
-
-    // Enviar los asientos seleccionados al backend
     const reservationResponse = await axios.post('http://localhost:5001/api/seats/reserve-seats', {
       flightId: flightId,
       selectedSeats: selectedSeats.value,
     });
 
     if (reservationResponse.data.success) {
-      // Guardamos la reserva en el store
-      reservationStore.setReservation(flight.value, selectedSeats.value);
-      
-
+      reservationStore.addReservation(flight.value, selectedSeats.value);
       alert('Asientos reservados con éxito');
-      
-      // Redirigir a la página de perfil
       router.push('/profile');
     } else {
       alert('Error al reservar los asientos');
@@ -147,8 +123,6 @@ const saveSeats = async () => {
   }
 };
 
-
-// Llamar a getSeats cuando el componente se monte
 onMounted(() => {
   if (flightId) {
     getSeats();
@@ -157,3 +131,104 @@ onMounted(() => {
   }
 });
 </script>
+
+<style scoped>
+/* Estilo general */
+.seats-container {
+  font-family: 'Arial', sans-serif;
+  background-color: #f4f7fc;
+  padding: 20px;
+  max-width: 1000px;
+  margin: 0 auto;
+  border-radius: 8px;
+}
+
+.title {
+  font-size: 2rem;
+  font-weight: bold;
+  color: #333;
+  text-align: center;
+}
+
+.subtitle {
+  font-size: 1.5rem;
+  color: #007bff;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.seats-list {
+  margin-top: 20px;
+}
+
+.seats-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+  gap: 10px;
+  justify-items: center;
+}
+
+.seat-item {
+  background-color: #fff;
+  border-radius: 8px;
+  padding: 15px;
+  border: 2px solid #007bff;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.seat-item:hover {
+  transform: scale(1.1);
+}
+
+.seat-label {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.seat-checkbox {
+  margin-right: 10px;
+}
+
+.seat-number {
+  font-size: 1.2rem;
+  font-weight: bold;
+}
+
+.selected-seats {
+  margin-top: 30px;
+}
+
+.selected-seats h3 {
+  font-size: 1.5rem;
+  color: #333;
+}
+
+.selected-seat-item {
+  font-size: 1.2rem;
+  color: #333;
+}
+
+.btn-save {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 1rem;
+  margin-top: 20px;
+  transition: background-color 0.3s;
+}
+
+.btn-save:hover {
+  background-color: #0056b3;
+}
+
+.no-seats {
+  color: #e74c3c;
+  text-align: center;
+  font-size: 1.2rem;
+}
+</style>

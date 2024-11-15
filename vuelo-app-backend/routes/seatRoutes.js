@@ -15,6 +15,7 @@ router.get('/', async (req, res) => {
         return res.status(400).json({ error: 'El parámetro flightId es obligatorio' });
       }
   
+  
       // Aquí iría la lógica para obtener los asientos del vuelo
       const seats = await getSeatsForFlight(flightId);  // Suponiendo que existe una función que obtiene los asientos
       
@@ -30,6 +31,7 @@ router.get('/', async (req, res) => {
   });
   
   // Endpoint para reservar asientos
+// Endpoint para reservar asientos
 router.post('/reserve-seats', async (req, res) => {
   const { flightId, selectedSeats } = req.body;
 
@@ -38,16 +40,32 @@ router.post('/reserve-seats', async (req, res) => {
   }
 
   try {
-    // Comprobar que los asientos seleccionados pertenecen al vuelo correcto y están disponibles
+    // Buscar el vuelo por su ID
     const flight = await Flight.findById(flightId);
     if (!flight) {
       return res.status(404).json({ success: false, message: 'Vuelo no encontrado' });
     }
 
-    // Verificar que los asientos no están ocupados
+ 
+
+    // Contar los asientos disponibles
+    const availableSeatsCount = await Seat.countDocuments({
+      flightId: flightId,
+      isBooked: false, // Solo contar asientos disponibles
+    });
+
+    // Verificar si la cantidad de asientos seleccionados es mayor que los disponibles
+    if (selectedSeats.length > availableSeatsCount) {
+      return res.status(400).json({
+        success: false,
+        message: `Solo hay ${availableSeatsCount} asientos disponibles para este vuelo.`,
+      });
+    }
+
+    // Verificar que los asientos seleccionados no estén ocupados
     const seatsToUpdate = await Seat.find({
       flightId: flightId,
-      number: { $in: selectedSeats },  // Buscar los asientos seleccionados
+      number: { $in: selectedSeats },
     });
 
     const unavailableSeats = seatsToUpdate.filter(seat => seat.isBooked);
@@ -72,7 +90,6 @@ router.post('/reserve-seats', async (req, res) => {
     res.status(500).json({ success: false, message: 'Error interno del servidor' });
   }
 });
-
 
 // Ruta para reservar varios asientos
 router.post('/reserveBatch', async (req, res) => {
