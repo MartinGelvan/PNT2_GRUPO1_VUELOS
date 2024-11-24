@@ -39,7 +39,7 @@ export const reserveFlight = async (req, res) => {
     // Obtener todos los asientos del vuelo
     const seats = await Seat.find({ flightId });
     const unavailableSeats = seats.filter(seat => 
-      seatNumbers.includes(seat.number) && seat.isBooked
+      seatNumbers.includes(seat.seatNumber) && seat.isBooked
     );
 
     if (unavailableSeats.length > 0) {
@@ -48,7 +48,7 @@ export const reserveFlight = async (req, res) => {
 
     // Marcar los asientos seleccionados como ocupados
     for (let seatNumber of seatNumbers) {
-      const seat = await Seat.findOne({ flightId, number: seatNumber });
+      const seat = await Seat.findOne({ flightId, seatNumber: seatNumber });
       if (seat && !seat.isBooked) {
         seat.isBooked = true;
         await seat.save();

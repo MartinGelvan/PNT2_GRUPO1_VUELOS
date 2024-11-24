@@ -1,18 +1,20 @@
 <template>
   <div class="profile-container">
     <div class="profile-card">
-      <h2 class="text-center">Bienvenido, {{ userStore.getUserName }}</h2>
+      <h2 class="text-center">Bienvenido, {{ userName }}</h2>
 
       <!-- Mostrar todos los vuelos reservados -->
       <div v-if="reservedFlights.length > 0" class="reserved-flights-section">
         <h3 class="text-center">Vuelos Reservados</h3>
-        
-        <!-- Iterar sobre los vuelos reservados -->
+
+        <!-- Iterar sobre las reservas -->
         <div v-for="(reservation, index) in reservedFlights" :key="index" class="reserved-flight-item">
           <p class="flight-details">
-            <strong>Vuelo:</strong> {{ reservation.flight.flightNumber }} - {{ reservation.flight.departure }} to {{ reservation.flight.destination }}<br />
-            <strong>Fecha:</strong> {{ reservation.flight.date }}<br />
-            <strong>Asientos reservados:</strong> {{ reservation.seats.join(', ') }}
+            <strong>Vuelo:</strong> {{ reservation.flight.flightNumber }} - 
+            {{ reservation.flight.departure }} a {{ reservation.flight.destination }}<br />
+            <strong>Fecha:</strong> {{ formatDate(reservation.flight.date) }}<br />
+            <strong>Asientos reservados:</strong> 
+            {{ reservation.seats.map(seat => seat.seatNumber).join(', ') }}
           </p>
         </div>
       </div>
@@ -26,19 +28,42 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from 'vue';
-import { useUserStore } from '../store/userStore.js';
+import { computed, onMounted } from 'vue';
+import { useRouter } from 'vue-router';
 import { useReservationStore } from '../store/reservationStore.js';
+import { useUserStore } from '../store/userStore.js';
 
-const userStore = useUserStore();
 const reservationStore = useReservationStore();
+const userStore = useUserStore();
+const router = useRouter();
 
-// Computed properties para acceder a todos los vuelos reservados
-const reservedFlights = computed(() => reservationStore.getReservedFlights);
+// Computed properties para acceder a las reservas completas
+const reservedFlights = computed(() => reservationStore.getReservations);
+const userName = localStorage.getItem('user-name');
 
-// No necesitas hacer ninguna llamada a la API, ya que las reservas están en el store
+// Función para formatear la fecha
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  
+  return `${day}/${month}/${year} ${hours}:${minutes}`;
+};
+
+// Verificar si el token existe al montar el componente
 onMounted(() => {
-  console.log("Profile cargado");
+  const token = localStorage.getItem('auth-token');
+  if (!token) {
+    userStore.logout();  // Desloguear si no hay token
+    router.push('/login');  // Redirigir al login
+  } else {
+    reservationStore.fetchReservations();  // Si hay token, obtener las reservas
+  }
 });
 </script>
 

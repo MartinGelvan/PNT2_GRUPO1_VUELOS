@@ -54,7 +54,6 @@ export const loginUser = async (req, res) => {
   console.log("Datos recibidos en login:", req.body);  
 
   try {
-   
     const user = await User.findOne({ email });
     if (!user) {
       console.log("Usuario no encontrado");
@@ -68,8 +67,7 @@ export const loginUser = async (req, res) => {
       return res.status(400).json({ message: 'Credenciales incorrectas.' });
     }
 
-    
-    const token = jwt.sign({ userId: user._id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+    const token = jwt.sign({ userId: user._id, userEmail: user.email }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.status(200).json({ message: 'Login exitoso', token , name: user.name});
 
   } catch (error) {

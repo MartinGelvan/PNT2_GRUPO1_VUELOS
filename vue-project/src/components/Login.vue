@@ -57,10 +57,16 @@ const loginUser = async () => {
       password: password.value
     });
 
-    userStore.setUserName(response.data.name);
+    // Guardar el token y el nombre de usuario en el localStorage
     localStorage.setItem('auth-token', response.data.token);
+    localStorage.setItem('user-name', response.data.name);
 
-    router.push('/profile');
+    // Actualizar el store de usuario
+    userStore.setUserName(response.data.name);  // Actualizar el nombre en el store
+    userStore.setUser({ name: response.data.name, token: response.data.token });  // Puedes agregar más información del usuario si es necesario
+
+    // Ahora redirigir al perfil después de actualizar el store
+    window.location.replace('/profile');
   } catch (error) {
     if (error.response && error.response.data) {
       errorMessage.value = error.response.data.message || 'Error al iniciar sesión';

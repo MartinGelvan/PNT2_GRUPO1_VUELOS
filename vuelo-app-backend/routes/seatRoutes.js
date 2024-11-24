@@ -3,8 +3,10 @@ import { getSeatsForFlight , reserveBatchSeats } from '../controllers/seatContro
 import Seat from '../models/Seat.js';
 import Flight from '../models/Flight.js';
 import mongoose from 'mongoose';
-
+import Reservation from '../models/Reservation.js';
 const router = express.Router();  // Usa 'router', no 'app'
+import jwt from 'jsonwebtoken'; 
+import { Types } from 'mongoose';  // Para trabajar con ObjectId, si es necesario
 
 // Ruta para obtener los asientos de un vuelo específico
 router.get('/', async (req, res) => {
@@ -34,6 +36,12 @@ router.get('/', async (req, res) => {
 // Endpoint para reservar asientos
 router.post('/reserve-seats', async (req, res) => {
   const { flightId, selectedSeats } = req.body;
+  const token = req.header('Authorization')?.split(' ')[1]; 
+  console.log(token);
+  if (!token) {
+    return res.status(401).json({ message: 'Acceso denegado. No se proporcionó un token.' });
+  }
+  const decoded = jwt.verify(token, process.env.JWT_SECRET); 
 
   if (!flightId || !selectedSeats || selectedSeats.length === 0) {
     return res.status(400).json({ success: false, message: 'Datos incompletos' });
@@ -65,23 +73,31 @@ router.post('/reserve-seats', async (req, res) => {
     // Verificar que los asientos seleccionados no estén ocupados
     const seatsToUpdate = await Seat.find({
       flightId: flightId,
-      number: { $in: selectedSeats },
+      seatNumber: { $in: selectedSeats },
     });
 
     const unavailableSeats = seatsToUpdate.filter(seat => seat.isBooked);
     if (unavailableSeats.length > 0) {
       return res.status(400).json({
         success: false,
-        message: `Los siguientes asientos ya están ocupados: ${unavailableSeats.map(seat => seat.number).join(', ')}`,
+        message: `Los siguientes asientos ya están ocupados: ${unavailableSeats.map(seat => seat.seatNumber).join(', ')}`,
       });
     }
 
     // Marcar los asientos seleccionados como ocupados
     await Seat.updateMany(
-      { flightId: flightId, number: { $in: selectedSeats } },
+      { flightId: flightId, seatNumber: { $in: selectedSeats } },
       { $set: { isBooked: true } }
     );
+    const seatsIds = seatsToUpdate.map(seat => seat._id);
+    const newReservation = new Reservation({
+      flightId: new mongoose.Types.ObjectId(flightId),  // Explicit use of 'new'
+      userId: new mongoose.Types.ObjectId(decoded.userId),      // Explicit use of 'new'
+      seats: seatsIds,  // seatsIds should already be an array of ObjectIds
+    });
 
+    // Guardar la reserva en la base de datos
+    await newReservation.save();
     // Responder con éxito
     res.json({ success: true, message: 'Asientos reservados con éxito' });
 

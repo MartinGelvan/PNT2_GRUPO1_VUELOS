@@ -2,18 +2,15 @@
   <div class="container mt-4">
     <h3 class="mb-4">Vuelos disponibles</h3>
     
-    <!-- Contenedor de tarjetas -->
     <div class="row">
       <div class="col-md-4 mb-4" v-for="flight in flights" :key="flight._id">
         
-        <!-- Tarjeta de vuelo -->
         <div class="card">
           <div class="card-body">
             <h5 class="card-title">{{ flight.flightNumber }} - {{ flight.departure }} to {{ flight.destination }}</h5>
-            <p class="card-text">Fecha: {{ flight.date }}</p>
+            <p class="card-text">Fecha: {{ formatDate(flight.date) }}</p>
             <p class="card-text">Asientos disponibles: {{ flight.availableSeats }}</p>
             
-            <!-- Input para la cantidad de asientos -->
             <div class="mb-3">
               <input 
                 type="number" 
@@ -25,19 +22,17 @@
               />
             </div>
             
-            <!-- Error si se elige un número de asientos mayor al disponible -->
             <p v-if="seatCounts[flight._id] > flight.availableSeats" class="text-danger">
               Solo hay {{ flight.availableSeats }} asientos disponibles para este vuelo.
             </p>
             
-            <!-- Botón de reserva -->
             <button 
-              class="btn btn-primary" 
-              @click="navigateToSeats(flight._id)"
-              :disabled="seatCounts[flight._id] <= 0 || seatCounts[flight._id] > flight.availableSeats"
-            >
-              Reservar
-            </button>
+  class="btn btn-primary" 
+  @click="navigateToSeats(flight._id)"
+  :disabled="!seatCounts[flight._id] || seatCounts[flight._id] <= 0 || seatCounts[flight._id] > flight.availableSeats"
+>
+  Reservar
+</button>
           </div>
         </div>
 
@@ -73,7 +68,18 @@ onMounted(() => {
   console.log("vuelos obtenidos");
 });
 
-
+const formatDate = (dateString) => {
+  const date = new Date(dateString);
+  
+  const day = String(date.getDate()).padStart(2, '0');
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Los meses empiezan desde 0
+  const year = date.getFullYear();
+  
+  const hours = String(date.getHours()).padStart(2, '0');
+  const minutes = String(date.getMinutes()).padStart(2, '0');
+  
+  return `${day}/${month}/${year} ${hours}:${minutes}`;
+};
 
 const getFlights = async () => {
   try {

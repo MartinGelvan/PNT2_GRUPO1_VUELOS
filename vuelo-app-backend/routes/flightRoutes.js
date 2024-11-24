@@ -1,6 +1,7 @@
 import express from 'express';
 import { getFlightById, getFlights, reserveFlight } from '../controllers/flightController.js';
-
+import Reservation from '../models/Reservation.js';
+import jwt from 'jsonwebtoken';
 const router = express.Router();
 
 router.get('/', getFlights);
@@ -21,4 +22,17 @@ router.get('/flight',getFlightById)
     }
   });
  */
+
+  router.get('/reservations', async (req, res) => {
+    try {
+      const token = req.header('Authorization')?.split(' ')[1]; 
+      const decoded = jwt.verify(token, process.env.JWT_SECRET); 
+      const userId = decoded.userId; 
+      const reservations = await Reservation.find({ userId: userId }).populate('flightId seats');
+      res.status(200).json(reservations);
+    } catch (error) {
+      console.error('Error al obtener las reservas:', error);
+      res.status(500).json({ message: 'Error al obtener las reservas' });
+    }
+  });
 export default router;

@@ -13,7 +13,15 @@
 
 <script setup>
 import Nav from './components/Nav.vue';
-import Navbar from './components/Navbar.vue';  // Asegúrate de importar el componente Navbar
+import Navbar from './components/Navbar.vue'; 
+import { onMounted } from 'vue';
+import {useUserStore} from './store/userStore.js';
+
+const userStore = useUserStore();
+
+onMounted(() => {
+  userStore.loadUserFromStorage();  // Cargar el usuario desde localStorage al montar el componente
+});
 </script>
 
 <style>
